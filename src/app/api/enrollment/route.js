@@ -159,10 +159,7 @@ export const DELETE = async (request) => {
       },
       { status: 404 }
     );
-
-  DB.enrollments = DB.enrollments.filter(
-    (x) => x.studentId !== studentId && x.courseNo !== courseNo
-  );
+  DB.enrollments = DB.enrollments.filter((x) => x.studentId !== studentId);
 
   //perform deletion by using splice or array filter
   //if code reach here it means deletion is complete
