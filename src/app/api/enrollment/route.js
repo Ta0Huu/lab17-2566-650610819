@@ -28,13 +28,14 @@ export const GET = async (request) => {
   //check if user provide one of 'studentId' or 'courseNo'
   //User must not provide both values, and must not provide nothing
 
-  // return NextResponse.json(
-  //   {
-  //     ok: false,
-  //     message: "Please provide either studentId or courseNo and not both!",
-  //   },
-  //   { status: 400 }
-  // );
+  if ((studentId && courseNo) || (!studentId && !courseNo))
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "Please provide either studentId or courseNo and not both!",
+      },
+      { status: 400 }
+    );
 
   //get all courses enrolled by a student
   if (studentId) {
@@ -60,9 +61,16 @@ export const GET = async (request) => {
     const studentIdList = [];
     for (const enroll of DB.enrollments) {
       //your code here
+      if (enroll.courseNo === courseNo) {
+        studentIdList.push(enroll.studentId);
+      }
     }
 
     const students = [];
+    for (const studentId of studentIdList) {
+      const student = DB.students.find((x) => x.studentId === studentId);
+      students.push(student);
+    }
     //your code here
 
     return NextResponse.json({
@@ -139,20 +147,26 @@ export const DELETE = async (request) => {
   }
 
   const { studentId, courseNo } = body;
+  const foundStudent = DB.enrollments.find((x) => x.studentId === studentId);
+  const foundCourse = DB.enrollments.find((x) => x.courseNo === courseNo);
+  if (!foundStudent && !foundCourse)
+    //check if studentId and courseNo exist on enrollment
 
-  //check if studentId and courseNo exist on enrollment
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "Enrollment does not exist",
+      },
+      { status: 404 }
+    );
 
-  // return NextResponse.json(
-  //   {
-  //     ok: false,
-  //     message: "Enrollment does not exist",
-  //   },
-  //   { status: 404 }
-  // );
+  DB.enrollments = DB.enrollments.filter(
+    (x) => x.studentId !== studentId && x.courseNo !== courseNo
+  );
 
   //perform deletion by using splice or array filter
-
   //if code reach here it means deletion is complete
+
   return NextResponse.json({
     ok: true,
     message: "Enrollment has been deleted",
